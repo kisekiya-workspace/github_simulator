@@ -1,0 +1,7 @@
+﻿src/App.tsx(38,14): error TS2739: Type '{}' is missing the following properties from type '{ activeFile: string | null; setActiveFile: (f: string | null) => void; }': activeFile, setActiveFile
+src/components/ActionPanel.tsx(8,36): error TS6133: 'commits' is declared but its value is never read.
+src/components/GitGraph.tsx(4,1): error TS6133: 'Commit' is declared but its value is never read.
+src/components/GitGraph.tsx(5,10): error TS6133: 'GitCommit' is declared but its value is never read.
+src/store/gitStore.ts(3,33): error TS6196: 'ConflictState' is declared but never used.
+src/store/gitStore.ts(62,11): error TS6133: 'isSame' is declared but its value is never read.
+src/store/gitStore.ts(281,19): error TS6133: 'message' is declared but its value is never read.

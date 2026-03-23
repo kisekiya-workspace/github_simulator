@@ -104,63 +104,64 @@ export const Terminal: FC = () => {
 
   const getLineColor = (type: string) => {
     switch (type) {
-      case 'input': return 'text-cyan-300';
-      case 'output': return 'text-slate-300';
-      case 'error': return 'text-red-400';
-      case 'success': return 'text-emerald-400';
-      case 'info': return 'text-blue-400';
-      case 'diff-add': return 'text-emerald-400';
-      case 'diff-remove': return 'text-red-400';
-      case 'diff-header': return 'text-amber-400 font-bold';
-      default: return 'text-slate-300';
+      case 'input': return 'text-zinc-300';
+      case 'output': return 'text-zinc-400';
+      case 'error': return 'text-red-500';
+      case 'success': return 'text-emerald-500';
+      case 'info': return 'text-blue-500';
+      case 'diff-add': return 'text-emerald-500';
+      case 'diff-remove': return 'text-red-500';
+      case 'diff-header': return 'text-zinc-500 font-bold';
+      default: return 'text-zinc-400';
     }
   };
 
   return (
     <div 
-      className="flex flex-col h-full bg-slate-950 font-mono text-sm"
+      className="flex flex-col h-full bg-[#050505] font-mono text-sm leading-relaxed"
       onClick={() => inputRef.current?.focus()}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800 bg-slate-900 shrink-0">
-        <TerminalSquare size={14} className="text-emerald-500" />
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Terminal</span>
-        <span className="text-xs text-slate-600 ml-auto">Type "help" for commands</span>
+      <div className="flex items-center gap-3 px-6 py-3 border-b border-white/5 bg-[#0a0a0a] shrink-0">
+        <TerminalSquare size={16} className="text-emerald-500" />
+        <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Terminal</span>
+        <span className="text-[10px] text-zinc-700 ml-auto uppercase tracking-widest">Type "help" for commands</span>
       </div>
 
       {/* Output */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-0.5">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-1 selection:bg-white/10 selection:text-white">
         {terminalHistory.length === 0 && (
-          <div className="text-slate-600 text-xs py-2">
-            <p className="text-emerald-500/60 mb-1">Welcome to Git Sandbox Terminal</p>
-            <p>Type <span className="text-cyan-400">'help'</span> to see available commands, or start with <span className="text-cyan-400">'git status'</span></p>
+          <div className="text-zinc-700 text-[11px] py-4 px-1 font-mono uppercase tracking-loose">
+            <p className="text-emerald-500/80 mb-2 font-bold select-none tracking-[0.1em]">/ Git Sandbox Interactive Shell v2.0.4</p>
+            <p className="select-none">Type 'help' to see available commands</p>
+            <p className="select-none">Start with 'git status' or 'git log'</p>
           </div>
         )}
 
         {terminalHistory.map((line) => (
-          <div key={line.id} className={`${getLineColor(line.type)} leading-relaxed whitespace-pre-wrap`}>
+          <div key={line.id} className={`${getLineColor(line.type)} leading-relaxed whitespace-pre-wrap font-mono`}>
             {line.type === 'input' ? (
-              <span className="flex items-center gap-1">
-                <ChevronRight size={12} className="text-emerald-500 shrink-0" />
-                <span className="text-cyan-300">{line.content}</span>
+              <span className="flex items-center gap-2">
+                <ChevronRight size={14} className="text-emerald-500 shrink-0" />
+                <span className="text-zinc-200">{line.content}</span>
               </span>
             ) : (
-              <span className="pl-4">{line.content}</span>
+              <span className="pl-6">{line.content}</span>
             )}
           </div>
         ))}
       </div>
 
       {/* Input */}
-      <div className="relative border-t border-slate-800 bg-slate-900/50">
+      <div className="relative border-t border-white/5 bg-[#0a0a0a]">
         {/* Autocomplete */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute bottom-full left-0 right-0 bg-slate-800 border border-slate-700 rounded-t-lg shadow-xl max-h-40 overflow-y-auto z-50">
+          <div className="absolute bottom-full left-0 right-0 bg-[#111111] border border-white/10 rounded-t-xl shadow-2xl max-h-48 overflow-y-auto z-50 animate-slide-up">
             {suggestions.map((s, i) => (
               <button
                 key={s}
-                className={`w-full text-left px-4 py-1.5 text-sm font-mono transition-colors ${
-                  i === selectedSuggestion ? 'bg-blue-600/30 text-white' : 'text-slate-400 hover:bg-slate-700/50'
+                className={`w-full text-left px-4 py-2 text-[11px] font-mono transition-all uppercase tracking-widest ${
+                  i === selectedSuggestion ? 'bg-white/10 text-white' : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.02]'
                 }`}
                 onClick={() => {
                   setInput(s);
@@ -174,14 +175,14 @@ export const Terminal: FC = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-2 px-3 py-2">
-          <ChevronRight size={14} className="text-emerald-500 shrink-0" />
+        <div className="flex items-center gap-2 px-4 py-3">
+          <ChevronRight size={16} className="text-emerald-500 shrink-0" />
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-white outline-none font-mono text-sm placeholder-slate-600"
+            className="flex-1 bg-transparent text-white outline-none font-mono text-sm placeholder:text-zinc-800"
             placeholder="git status"
             spellCheck={false}
             autoComplete="off"

@@ -1,5 +1,6 @@
 import type { GitState, TerminalLine } from '../types';
 import { computeFileDiffs } from './utils';
+import { GIT_COMMANDS } from '../data/gitCommands';
 
 type OutputLine = Omit<TerminalLine, 'id' | 'timestamp'>;
 
@@ -20,6 +21,9 @@ export function executeCommand(input: string, store: GitState): OutputLine[] {
   }
 
   if (cmd === 'help') {
+    if (parts.length > 1) {
+      return getDetailedCommandHelp(parts[1]);
+    }
     return getHelpOutput();
   }
 
@@ -28,6 +32,15 @@ export function executeCommand(input: string, store: GitState): OutputLine[] {
   }
 
   const subCommand = parts[1]?.toLowerCase();
+  
+  // Handle git help <command> or git <command> --help
+  if (subCommand === 'help' && parts[2]) {
+    return getDetailedCommandHelp(parts[2]);
+  }
+  if (subCommand && (hasFlag(parts.slice(2), '--help') || hasFlag(parts.slice(2), '-h'))) {
+    return getDetailedCommandHelp(subCommand);
+  }
+
   if (!subCommand) {
     return [{ type: 'error', content: "Usage: git <command>. Type 'help' for available commands." }];
   }
@@ -560,7 +573,41 @@ function handleRm(args: string[], store: GitState): OutputLine[] {
   return results;
 }
 
-// ── Help ─────────────────────────────────────────────────────
+function getDetailedCommandHelp(command: string): OutputLine[] {
+  const normalized = command.startsWith('git ') ? command.slice(4).toLowerCase() : command.toLowerCase();
+  const doc = GIT_COMMANDS.find(c => c.name === normalized);
+
+  if (!doc) {
+    return [{ type: 'error', content: `No detailed documentation found for command: ${command}` }];
+  }
+
+  const lines: OutputLine[] = [
+    { type: 'info', content: `COMMAND: git ${normalized}` },
+    { type: 'output', content: '' },
+    { type: 'output', content: doc.description },
+    { type: 'output', content: '' },
+  ];
+
+  if (doc.situations && doc.situations.length > 0) {
+    lines.push({ type: 'info', content: 'WHEN TO USE:' });
+    lines.push({ type: 'output', content: `  • ${doc.situations[0]}` });
+    lines.push({ type: 'output', content: '' });
+  }
+
+  lines.push({ type: 'diff-header', content: 'Usage:' });
+  lines.push({ type: 'output', content: `  ${doc.usage}` });
+  lines.push({ type: 'output', content: '' });
+  lines.push({ type: 'diff-header', content: 'Examples:' });
+
+  doc.examples.forEach(ex => {
+    lines.push({ type: 'output', content: `  $ ${ex}` });
+  });
+
+  lines.push({ type: 'output', content: '' });
+  lines.push({ type: 'info', content: '💡 Tip: Open the "Docs" page for full troubleshooting & FAQ.' });
+
+  return lines;
+}
 
 function getHelpOutput(): OutputLine[] {
   return [
@@ -568,47 +615,33 @@ function getHelpOutput(): OutputLine[] {
     { type: 'info', content: '║     Git Sandbox — Available Commands      ║' },
     { type: 'info', content: '╚══════════════════════════════════════════╝' },
     { type: 'output', content: '' },
+    { type: 'output', content: 'Type "git help <command>" for detailed info.' },
+    { type: 'output', content: '' },
     { type: 'diff-header', content: 'Getting Started:' },
     { type: 'output', content: '  git init              Initialize a new repository' },
     { type: 'output', content: '  git status            Show working tree status' },
     { type: 'output', content: '' },
     { type: 'diff-header', content: 'Staging & Committing:' },
     { type: 'output', content: '  git add <file>        Stage a file' },
-    { type: 'output', content: '  git add .             Stage all changes' },
     { type: 'output', content: '  git commit -m "msg"   Create a commit' },
     { type: 'output', content: '  git rm <file>         Remove and stage deletion' },
     { type: 'output', content: '' },
     { type: 'diff-header', content: 'Branching:' },
-    { type: 'output', content: '  git branch            List branches' },
-    { type: 'output', content: '  git branch <name>     Create a branch' },
-    { type: 'output', content: '  git branch -d <name>  Delete a branch' },
+    { type: 'output', content: '  git branch            List/create branches' },
     { type: 'output', content: '  git checkout <target> Switch branch or commit' },
-    { type: 'output', content: '  git checkout -b <name> Create and switch' },
     { type: 'output', content: '' },
     { type: 'diff-header', content: 'Merging & Rebasing:' },
     { type: 'output', content: '  git merge <branch>    Merge branch into HEAD' },
     { type: 'output', content: '  git rebase <branch>   Rebase HEAD onto branch' },
-    { type: 'output', content: '  git cherry-pick <id>  Apply a specific commit' },
     { type: 'output', content: '' },
-    { type: 'diff-header', content: 'History & Inspection:' },
-    { type: 'output', content: '  git log               Show commit history' },
-    { type: 'output', content: '  git log -n <count>    Limit log entries' },
-    { type: 'output', content: '  git diff              Show unstaged changes' },
-    { type: 'output', content: '' },
-    { type: 'diff-header', content: 'Stash & Tags:' },
+    { type: 'diff-header', content: 'Advanced:' },
     { type: 'output', content: '  git stash             Save changes temporarily' },
-    { type: 'output', content: '  git stash pop         Restore stashed changes' },
-    { type: 'output', content: '  git stash list        List stash entries' },
+    { type: 'output', content: '  git cherry-pick <id>  Apply a specific commit' },
     { type: 'output', content: '  git tag <name>        Create a tag' },
-    { type: 'output', content: '  git tag -d <name>     Delete a tag' },
-    { type: 'output', content: '' },
-    { type: 'diff-header', content: 'Undo:' },
-    { type: 'output', content: '  git reset --soft      Soft reset to HEAD' },
-    { type: 'output', content: '  git reset --hard      Hard reset to HEAD' },
-    { type: 'output', content: '  git reset --hard <id> Reset to specific commit' },
+    { type: 'output', content: '  git reset <type>      Reset HEAD to commit' },
     { type: 'output', content: '' },
     { type: 'info', content: '  clear                 Clear terminal' },
-    { type: 'info', content: '  help                  Show this help' },
+    { type: 'info', content: '  help [command]        Show this help or detailed docs' },
   ];
 }
 

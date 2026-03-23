@@ -11,9 +11,9 @@ interface TourStep {
   title: string;
   description: string;
   icon: FC<{ size?: number; className?: string }>;
-  highlight: string; // CSS selector or area name
+  highlight?: string; // CSS selector
+  spotlightArea?: { top: string; left: string; width: string; height: string }; // Fallback/Welcome
   position: 'left' | 'right' | 'top' | 'bottom' | 'center';
-  spotlightArea: { top: string; left: string; width: string; height: string };
   tips?: string[];
 }
 
@@ -23,9 +23,8 @@ const tourSteps: TourStep[] = [
     title: 'Welcome to Git Sandbox! 🎉',
     description: 'This is your interactive Git learning playground. Let me give you a quick tour of all the tools at your disposal.',
     icon: Sparkles,
-    highlight: 'welcome',
-    position: 'center',
     spotlightArea: { top: '6%', left: '1%', width: '98%', height: '92%' },
+    position: 'center',
     tips: ['Everything runs in your browser — no server needed', 'Your progress is saved automatically'],
   },
   {
@@ -33,9 +32,8 @@ const tourSteps: TourStep[] = [
     title: 'Lessons Panel',
     description: 'Choose from 12 guided scenarios organized by difficulty. Each lesson teaches a different Git concept with step-by-step tasks, concept explanations, and hints.',
     icon: BookOpen,
-    highlight: 'lessons',
+    highlight: '#app-lessons',
     position: 'right',
-    spotlightArea: { top: '5%', left: '0%', width: '21.5%', height: '92%' },
     tips: ['Filter by difficulty: Beginner → Advanced', 'Click hints if you get stuck', 'Completed scenarios are saved'],
   },
   {
@@ -43,9 +41,8 @@ const tourSteps: TourStep[] = [
     title: 'File Explorer',
     description: 'Your project files live here. Create new files, see which ones are modified (M), new (A), or have conflicts (C). The staging area at the bottom shows what\'s ready to commit.',
     icon: FileCode,
-    highlight: 'explorer',
+    highlight: '#app-explorer',
     position: 'right',
-    spotlightArea: { top: '5%', left: '21.5%', width: '13%', height: '58%' },
     tips: ['Green dot = file is staged', 'Status badges: M (modified), A (added)', 'Click + to create new files'],
   },
   {
@@ -53,9 +50,8 @@ const tourSteps: TourStep[] = [
     title: 'Code Editor',
     description: 'Edit files with tabs, line numbers, and file status indicators. Changes appear in real-time. Use Ctrl+S to save your changes.',
     icon: FileCode,
-    highlight: 'editor',
+    highlight: '#app-editor',
     position: 'right',
-    spotlightArea: { top: '5%', left: '34.5%', width: '28%', height: '58%' },
     tips: ['Ctrl+S to save', 'Tab key for indentation', 'Unsaved changes show an amber dot'],
   },
   {
@@ -63,9 +59,8 @@ const tourSteps: TourStep[] = [
     title: 'Commit Graph',
     description: 'A visual representation of your repository\'s history. See branches as lanes, commits as nodes, and merge paths as curved lines. Click any commit to checkout.',
     icon: GitBranch,
-    highlight: 'graph',
+    highlight: '#app-graph',
     position: 'left',
-    spotlightArea: { top: '5%', left: '62.5%', width: '37%', height: '58%' },
     tips: ['Click a commit node to checkout', 'Hover for commit details', 'Toggle "All branches" to filter'],
   },
   {
@@ -73,9 +68,8 @@ const tourSteps: TourStep[] = [
     title: 'Git Terminal',
     description: 'Type real Git commands! Supports 16+ commands including git add, commit, branch, merge, stash, cherry-pick, and more. Use ↑↓ for command history and Tab for autocomplete.',
     icon: TerminalSquare,
-    highlight: 'terminal',
+    highlight: '#app-terminal',
     position: 'top',
-    spotlightArea: { top: '63%', left: '21.5%', width: '78%', height: '24%' },
     tips: ['Type "help" to see all commands', '↑/↓ arrows for command history', 'Tab for autocomplete', 'Ctrl+` to toggle terminal'],
   },
   {
@@ -83,9 +77,8 @@ const tourSteps: TourStep[] = [
     title: 'Action Panel',
     description: 'Quick-access buttons for commit, branch, merge, rebase, stash, and tags. Everything you can do in the terminal, you can also do here with one click.',
     icon: Layers,
-    highlight: 'actions',
+    highlight: '#app-actions',
     position: 'top',
-    spotlightArea: { top: '87%', left: '21.5%', width: '78%', height: '12%' },
     tips: ['Click "Stage all changes" before committing', 'Expand "Stash & Tags" for advanced features'],
   },
 ];
@@ -95,10 +88,48 @@ const STORAGE_KEY = 'git-sandbox-tour-complete';
 export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [spotlightCoords, setSpotlightCoords] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   const step = tourSteps[currentStep];
   const isFirst = currentStep === 0;
   const isLast = currentStep === tourSteps.length - 1;
+
+  useEffect(() => {
+    const updateCoords = () => {
+      if (step.highlight) {
+        const el = document.querySelector(step.highlight);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          // Add a small padding
+          const padding = 4;
+          setSpotlightCoords({
+            top: rect.top - padding,
+            left: rect.left - padding,
+            width: rect.width + padding * 2,
+            height: rect.height + padding * 2,
+          });
+          return;
+        }
+      }
+      
+      // Fallback to percentage-based or center
+      if (step.spotlightArea) {
+        const top = parseFloat(step.spotlightArea.top) * window.innerHeight / 100;
+        const left = parseFloat(step.spotlightArea.left) * window.innerWidth / 100;
+        const width = parseFloat(step.spotlightArea.width) * window.innerWidth / 100;
+        const height = parseFloat(step.spotlightArea.height) * window.innerHeight / 100;
+        setSpotlightCoords({ top, left, width, height });
+      }
+    };
+
+    // Small delay to ensure layout has settled
+    const timer = setTimeout(updateCoords, 100);
+    window.addEventListener('resize', updateCoords);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateCoords);
+    };
+  }, [currentStep, step]);
 
   const handleNext = () => {
     if (isLast) {
@@ -141,10 +172,10 @@ export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) =
               {/* White = visible (dark overlay shows), Black = hidden (cutout) */}
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               <rect
-                x={step.spotlightArea.left}
-                y={step.spotlightArea.top}
-                width={step.spotlightArea.width}
-                height={step.spotlightArea.height}
+                x={spotlightCoords.left}
+                y={spotlightCoords.top}
+                width={spotlightCoords.width}
+                height={spotlightCoords.height}
                 rx="12"
                 fill="black"
               />
@@ -157,19 +188,20 @@ export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) =
             mask="url(#spotlight-mask)"
           />
         </svg>
-
+ 
         {/* Spotlight border glow around the cutout area */}
         <motion.div
-          className="absolute border-2 border-blue-500/70 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.3),inset_0_0_40px_rgba(59,130,246,0.05)] pointer-events-none"
-          style={{
-            top: step.spotlightArea.top,
-            left: step.spotlightArea.left,
-            width: step.spotlightArea.width,
-            height: step.spotlightArea.height,
+          className="absolute border border-blue-500/50 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.15)] pointer-events-none"
+          animate={{
+            top: spotlightCoords.top,
+            left: spotlightCoords.left,
+            width: spotlightCoords.width,
+            height: spotlightCoords.height,
+            opacity: 1,
+            scale: 1
           }}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, scale: 0.98 }}
+          transition={{ type: "spring", damping: 30, stiffness: 250 }}
           key={step.id + '-border'}
         />
 
@@ -177,37 +209,37 @@ export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) =
         <motion.div
           key={step.id}
           className={`absolute z-10 w-[380px] ${getCardPosition(step)}`}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          initial={{ opacity: 0, y: 15, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, y: -10, scale: 0.98 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
         >
-          <div className="bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+          <div className="bg-[#111111] border border-white/10 rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/10 border-b border-slate-700/50 px-5 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-blue-500/20 rounded-lg">
-                  <Icon size={18} className="text-blue-400" />
+            <div className="bg-[#18181b] border-b border-white/5 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 rounded-xl">
+                  <Icon size={20} className="text-blue-500" />
                 </div>
-                <h3 className="text-white font-bold text-sm">{step.title}</h3>
+                <h3 className="text-white font-bold text-[13px] tracking-tight uppercase tracking-[0.1em]">{step.title}</h3>
               </div>
               <button
                 onClick={handleSkip}
-                className="p-1 text-slate-500 hover:text-white rounded hover:bg-slate-700/50 transition-colors"
+                className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/5 transition-all"
               >
-                <X size={14} />
+                <X size={16} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="px-5 py-4">
-              <p className="text-slate-300 text-sm leading-relaxed mb-3">{step.description}</p>
+            <div className="px-6 py-5">
+              <p className="text-zinc-400 text-[13px] leading-relaxed mb-4">{step.description}</p>
 
               {step.tips && (
-                <div className="space-y-1.5 mb-4">
+                <div className="space-y-2 mb-6 bg-[#0a0a0a] p-3 rounded-xl border border-white/[0.03]">
                   {step.tips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs text-slate-400">
-                      <span className="text-blue-400 mt-0.5 shrink-0">→</span>
+                    <div key={i} className="flex items-start gap-2.5 text-[11px] text-zinc-500 font-medium leading-normal">
+                      <span className="text-blue-500 font-bold shrink-0 mt-0.5">•</span>
                       <span>{tip}</span>
                     </div>
                   ))}
@@ -215,27 +247,27 @@ export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) =
               )}
 
               {/* Step Indicator */}
-              <div className="flex items-center gap-1.5 mb-4">
+              <div className="flex items-center gap-2 mb-6">
                 {tourSteps.map((_, i) => (
                   <div
                     key={i}
                     className={`h-1 rounded-full transition-all duration-300 ${
                       i === currentStep 
-                        ? 'bg-blue-500 w-6' 
+                        ? 'bg-blue-500 w-8' 
                         : i < currentStep 
-                          ? 'bg-blue-500/40 w-2' 
-                          : 'bg-slate-700 w-2'
+                          ? 'bg-blue-500/20 w-2' 
+                          : 'bg-zinc-800 w-2'
                     }`}
                   />
                 ))}
-                <span className="text-[10px] text-slate-600 ml-2">{currentStep + 1}/{tourSteps.length}</span>
+                <span className="text-[10px] text-zinc-700 font-bold ml-auto uppercase tracking-widest">{currentStep + 1} / {tourSteps.length}</span>
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.03]">
                 <button
                   onClick={handleSkip}
-                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                  className="text-[11px] font-bold text-zinc-600 hover:text-white transition-all uppercase tracking-widest"
                 >
                   Skip tour
                 </button>
@@ -243,19 +275,19 @@ export const OnboardingTour: FC<{ onComplete: () => void }> = ({ onComplete }) =
                   {!isFirst && (
                     <button
                       onClick={handlePrev}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs transition-colors"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all border border-white/5"
                     >
-                      <ChevronLeft size={12} /> Back
+                      <ChevronLeft size={14} /> Back
                     </button>
                   )}
                   <button
                     onClick={handleNext}
-                    className="flex items-center gap-1 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1.5 px-6 py-2 bg-white hover:bg-zinc-200 text-black rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
                   >
                     {isLast ? (
-                      <>Start Learning <Sparkles size={12} /></>
+                      <>Get Started <Sparkles size={14} /></>
                     ) : (
-                      <>Next <ChevronRight size={12} /></>
+                      <>Next Step <ChevronRight size={14} /></>
                     )}
                   </button>
                 </div>

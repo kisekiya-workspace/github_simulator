@@ -31,19 +31,19 @@ export const ActionPanel: FC = () => {
 
   if (conflictState) {
     return (
-      <div className="bg-red-950/20 border-t border-red-900/50 p-3 shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <GitMerge size={18} className="text-red-400" />
+      <div className="bg-[#1a0c0c] border-t border-red-500/20 p-4 shrink-0">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <GitMerge size={20} className="text-red-500" />
             <div>
-              <h3 className="text-red-400 font-bold text-sm">Merge Conflict</h3>
-              <p className="text-xs text-slate-400">
-                <strong>{conflictState.sourceBranch}</strong> → <strong>{conflictState.targetBranch}</strong>
-                {' · '}Conflicting: {Object.keys(conflictState.files).join(', ')}
+              <h3 className="text-red-500 font-bold text-sm tracking-tight">Merge Conflict</h3>
+              <p className="text-[11px] text-zinc-500 font-medium">
+                <span className="text-zinc-300">{conflictState.sourceBranch}</span> into <span className="text-zinc-300">{conflictState.targetBranch}</span>
+                {' · '} {Object.keys(conflictState.files).length} files pending resolution
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={() => {
                 Object.keys(conflictState.files).forEach(f => {
@@ -53,13 +53,13 @@ export const ActionPanel: FC = () => {
                 const resolvedState = useGitStore.getState();
                 resolvedState.completeMerge(`Merge branch '${conflictState.sourceBranch}' into ${conflictState.targetBranch}`);
               }}
-              className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all active:scale-95"
             >
               Resolve & Commit
             </button>
             <button 
               onClick={abortMerge}
-              className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs transition-colors"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-lg text-xs font-bold border border-white/5 transition-all"
             >
               Abort
             </button>
@@ -68,52 +68,51 @@ export const ActionPanel: FC = () => {
       </div>
     );
   }
-
   return (
-    <div className="bg-slate-800/50 border-t border-slate-700/50 p-3 shrink-0">
-      <div className="flex gap-4 overflow-x-auto items-stretch">
+    <div className="bg-[#050505] border-t border-white/5 p-4 shrink-0">
+      <div className="max-w-7xl mx-auto flex gap-8 overflow-x-auto items-stretch pb-2 no-scrollbar">
         {/* Commit */}
-        <form onSubmit={handleCommit} className="flex flex-col gap-1.5 min-w-[220px]">
-          <h3 className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider">
-            <GitCommit size={12} /> Commit
+        <form onSubmit={handleCommit} className="flex flex-col gap-2 min-w-[240px]">
+          <h3 className="text-[10px] font-mono font-bold text-zinc-500 flex items-center gap-2 uppercase tracking-[0.2em]">
+            <GitCommit size={14} /> Commit
           </h3>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <input 
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Commit message..."
-              className="flex-1 bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-blue-500 outline-none min-w-0"
+              className="flex-1 bg-[#111111] border border-white/5 p-2 px-3 rounded-lg text-xs text-white placeholder:text-zinc-600 focus:border-white/20 outline-none transition-all min-w-0"
             />
-            <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white px-3 rounded text-xs font-semibold transition-colors shrink-0">
+            <button type="submit" className="bg-white text-black hover:bg-zinc-200 px-4 rounded-lg text-xs font-bold transition-all active:scale-95 shrink-0">
               Commit
             </button>
           </div>
           <button
             type="button"
             onClick={() => { stageAllFiles(); }}
-            className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors text-left"
+            className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors text-left uppercase tracking-wider"
           >
             Stage all changes
           </button>
         </form>
 
-        <div className="w-px bg-slate-700/50 self-stretch" />
+        <div className="w-px bg-white/5 self-stretch my-2" />
 
         {/* Branch */}
-        <div className="flex flex-col gap-1.5 min-w-[200px]">
-          <h3 className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider">
-            <GitBranch size={12} /> Branch
+        <div className="flex flex-col gap-2 min-w-[220px]">
+          <h3 className="text-[10px] font-mono font-bold text-zinc-500 flex items-center gap-2 uppercase tracking-[0.2em]">
+            <GitBranch size={14} /> Branch
           </h3>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <input 
               value={branchName}
               onChange={(e) => setBranchName(e.target.value)}
               placeholder="New branch..."
-              className="flex-1 bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-blue-500 outline-none min-w-0"
+              className="flex-1 bg-[#111111] border border-white/5 p-2 px-3 rounded-lg text-xs text-white placeholder:text-zinc-600 focus:border-white/20 outline-none transition-all min-w-0"
             />
             <button 
               onClick={() => { if(branchName) { createBranch(branchName); setBranchName(''); } }}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 rounded text-xs font-semibold transition-colors shrink-0"
+              className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 rounded-lg text-xs font-bold transition-all active:scale-95 shrink-0"
             >
               Create
             </button>
@@ -121,7 +120,7 @@ export const ActionPanel: FC = () => {
           <select 
             value={currentBranchName}
             onChange={(e) => checkout(e.target.value)}
-            className="bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white outline-none"
+            className="bg-[#111111] border border-white/5 p-2 px-3 rounded-lg text-xs text-white outline-none cursor-pointer hover:border-white/10 focus:border-white/20"
           >
             {Object.keys(branches).map(b => (
               <option key={b} value={b}>{b} {b === currentBranchName ? '← HEAD' : ''}</option>
@@ -129,18 +128,18 @@ export const ActionPanel: FC = () => {
           </select>
         </div>
 
-        <div className="w-px bg-slate-700/50 self-stretch" />
+        <div className="w-px bg-white/5 self-stretch my-2" />
 
         {/* Merge / Rebase */}
-        <div className="flex flex-col gap-1.5 min-w-[240px]">
-          <h3 className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider">
-            <GitPullRequest size={12} /> Merge & Rebase
+        <div className="flex flex-col gap-2 min-w-[260px]">
+          <h3 className="text-[10px] font-mono font-bold text-zinc-500 flex items-center gap-2 uppercase tracking-[0.2em]">
+            <GitPullRequest size={14} /> Merge & Rebase
           </h3>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <select 
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="flex-1 bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white outline-none min-w-0"
+              className="flex-1 bg-[#111111] border border-white/5 p-2 px-3 rounded-lg text-xs text-white outline-none cursor-pointer hover:border-white/10 focus:border-white/20 min-w-0"
             >
               <option value="" disabled>Select branch...</option>
               {otherBranches.map(b => (
@@ -150,76 +149,76 @@ export const ActionPanel: FC = () => {
             <button 
               onClick={() => selectedBranch && merge(selectedBranch)}
               disabled={!selectedBranch}
-              className="bg-purple-600 hover:bg-purple-500 text-white px-2.5 rounded text-xs font-semibold disabled:opacity-40 transition-colors shrink-0"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-3 rounded-lg text-xs font-bold disabled:opacity-20 transition-all active:scale-95 shrink-0"
             >
               Merge
             </button>
             <button 
               onClick={() => selectedBranch && rebase(selectedBranch)}
               disabled={!selectedBranch}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 rounded text-xs font-semibold disabled:opacity-40 transition-colors shrink-0"
+              className="bg-zinc-800 hover:bg-zinc-700 text-white px-3 rounded-lg text-xs font-bold disabled:opacity-20 transition-all active:scale-95 shrink-0"
             >
               Rebase
             </button>
           </div>
         </div>
 
-        <div className="w-px bg-slate-700/50 self-stretch" />
+        <div className="w-px bg-white/5 self-stretch my-2" />
 
         {/* Advanced: Stash / Tag */}
-        <div className="flex flex-col gap-1.5 min-w-[180px]">
+        <div className="flex flex-col gap-2 min-w-[200px]">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-[10px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider hover:text-slate-300 transition-colors"
+            className="text-[10px] font-mono font-bold text-zinc-500 flex items-center gap-2 uppercase tracking-[0.2em] hover:text-zinc-300 transition-colors"
           >
-            <Archive size={12} /> Stash & Tags {showAdvanced ? '▼' : '▶'}
+            <Archive size={14} /> {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
           </button>
           {showAdvanced && (
-            <>
-              <div className="flex gap-1.5">
+            <div className="flex flex-col gap-2 animate-slide-up">
+              <div className="flex gap-2">
                 <button 
                   onClick={() => stashChanges()}
-                  className="flex-1 bg-cyan-600/80 hover:bg-cyan-500 text-white px-2 py-1.5 rounded text-xs font-semibold transition-colors"
+                  className="flex-1 bg-[#111111] hover:bg-[#18181b] text-zinc-300 px-3 py-2 rounded-lg text-xs font-bold border border-white/5 transition-all active:scale-95"
                 >
                   Stash {stash.length > 0 && `(${stash.length})`}
                 </button>
                 <button 
                   onClick={stashPop}
                   disabled={stash.length === 0}
-                  className="flex-1 bg-cyan-700/60 hover:bg-cyan-600 text-white px-2 py-1.5 rounded text-xs disabled:opacity-40 transition-colors"
+                  className="flex-1 bg-[#111111] hover:bg-[#18181b] text-zinc-300 px-3 py-2 rounded-lg text-xs font-bold border border-white/5 disabled:opacity-20 transition-all active:scale-95"
                 >
                   Pop
                 </button>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-2">
                 <input 
                   value={tagName}
                   onChange={(e) => setTagName(e.target.value)}
-                  placeholder="Tag name..."
-                  className="flex-1 bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-amber-500 outline-none min-w-0"
+                  placeholder="v1.0.0"
+                  className="flex-1 bg-[#111111] border border-white/5 p-2 px-3 rounded-lg text-xs text-white placeholder:text-zinc-600 focus:border-white/20 outline-none transition-all min-w-0"
                 />
                 <button 
                   onClick={() => { if (tagName) { createTag(tagName); setTagName(''); } }}
-                  className="bg-amber-600 hover:bg-amber-500 text-white px-2.5 rounded text-xs font-semibold transition-colors shrink-0"
+                  className="bg-amber-600/80 hover:bg-amber-600 text-white px-3 rounded-lg text-xs font-bold transition-all active:scale-95 shrink-0"
                 >
                   <Tag size={12} />
                 </button>
               </div>
-            </>
+            </div>
           )}
         </div>
 
         {/* Reset */}
-        <div className="flex-1 flex justify-end items-start">
+        <div className="flex-1 flex justify-end items-center">
           <button 
             onClick={() => {
               if (confirm('Reset repository? All history will be lost.')) {
                 resetAll();
               }
             }}
-            className="flex items-center gap-1.5 p-1.5 px-3 border border-red-900/50 text-red-400 hover:bg-red-900/20 rounded text-xs transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 rounded-lg text-xs font-bold border border-white/5 hover:border-red-500/20 transition-all active:scale-95"
           >
-            <RotateCcw size={12} /> Reset
+            <RotateCcw size={14} /> Reset Repo
           </button>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useGitStore from '../store/gitStore';
-import { scenarios, difficultyColors } from '../store/scenarios';
+import { scenarios } from '../store/scenarios';
 import type { ScenarioDifficulty } from '../types';
 import { CheckCircle2, Circle, BookOpen, ChevronDown, ChevronRight, Lightbulb, Trophy, Sparkles } from 'lucide-react';
 
@@ -30,23 +30,23 @@ export const LessonsPanel: FC = () => {
   }
 
   return (
-    <div className="w-64 bg-slate-900 flex flex-col h-full text-slate-300 overflow-hidden">
+    <div className="w-64 bg-[#0a0a0a] flex flex-col h-full text-zinc-400 overflow-hidden">
       {/* Header */}
-      <div className="p-3 border-b border-slate-700/50 flex items-center gap-2 bg-slate-950 font-semibold text-white shrink-0">
-        <BookOpen size={16} className="text-amber-500" />
-        <span className="text-sm">Lessons</span>
-        <span className="ml-auto text-[10px] text-slate-500">{totalCompleted}/{totalScenarios}</span>
+      <div className="p-4 border-b border-white/5 flex items-center gap-3 bg-[#050505] shrink-0">
+        <BookOpen size={18} className="text-white" />
+        <span className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">Lessons</span>
+        <span className="ml-auto text-[10px] text-zinc-600 font-mono">{totalCompleted}/{totalScenarios}</span>
       </div>
 
       {/* Progress Bar */}
-      <div className="px-3 py-2 bg-slate-900 border-b border-slate-800/50 shrink-0">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Progress</span>
-          <span className="text-[10px] text-emerald-400 font-bold">{progressPercent}%</span>
+      <div className="px-5 py-4 bg-[#0a0a0a] border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Progress</span>
+          <span className="text-[10px] text-emerald-500 font-mono font-bold">{progressPercent}%</span>
         </div>
-        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
           <motion.div 
-            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+            className="h-full bg-emerald-500"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.5 }}
@@ -77,15 +77,14 @@ export const LessonsPanel: FC = () => {
           const isActive = activeScenarioId === sc.id;
           const isComplete = completedScenarios.includes(sc.id);
           const isExpanded = expandedScenario === sc.id;
-          const colors = difficultyColors[sc.difficulty];
 
           return (
             <div key={sc.id} className={`rounded-lg border transition-all ${
-              isActive ? 'bg-slate-800/50 border-amber-600/40' : 'border-slate-800/50 hover:border-slate-700'
+              isActive ? 'bg-white/[0.03] border-white/10' : 'border-transparent hover:bg-white/[0.02]'
             }`}>
               {/* Scenario header */}
               <button 
-                className="w-full text-left p-2 flex items-center gap-2"
+                className="w-full text-left p-3 flex items-center gap-3"
                 onClick={() => {
                   setExpandedScenario(isExpanded ? null : sc.id);
                   if (!isActive) {
@@ -95,20 +94,17 @@ export const LessonsPanel: FC = () => {
               >
                 <div className="shrink-0">
                   {isComplete ? (
-                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    <CheckCircle2 size={16} className="text-emerald-500" />
                   ) : (
-                    <Circle size={14} className="text-slate-600" />
+                    <Circle size={16} className="text-zinc-800" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-white truncate">{sc.title}</span>
-                    <span className={`text-[8px] px-1 py-0.5 rounded ${colors.bg} ${colors.text} ${colors.border} border font-bold uppercase`}>
-                      {sc.difficulty.charAt(0)}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-zinc-400 text-medium'}`}>{sc.title}</span>
                   </div>
                 </div>
-                {isExpanded ? <ChevronDown size={12} className="text-slate-500" /> : <ChevronRight size={12} className="text-slate-500" />}
+                {isExpanded ? <ChevronDown size={14} className="text-zinc-700" /> : <ChevronRight size={14} className="text-zinc-700" />}
               </button>
 
               {/* Expanded content */}
@@ -121,31 +117,31 @@ export const LessonsPanel: FC = () => {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-2 pb-2 space-y-2">
-                      <p className="text-[11px] text-slate-400 leading-relaxed">{sc.description}</p>
+                    <div className="px-3 pb-3 space-y-3">
+                      <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">{sc.description}</p>
                       
                       {/* Concept */}
-                      <div className="bg-blue-950/30 p-2 rounded border border-blue-800/30">
-                        <div className="flex items-center gap-1 mb-1">
-                          <Sparkles size={10} className="text-blue-400" />
-                          <span className="text-[9px] font-bold text-blue-400 uppercase">Concept</span>
+                      <div className="bg-[#111111] p-3 rounded-lg border border-white/5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles size={12} className="text-blue-500" />
+                          <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Concept</span>
                         </div>
-                        <p className="text-[10px] text-blue-300/80 leading-relaxed">{sc.conceptExplanation}</p>
+                        <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">{sc.conceptExplanation}</p>
                       </div>
 
                       {/* Tasks */}
                       {isActive && (
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           {sc.tasks.map((task, idx) => {
                             const isTaskComplete = task.check(state);
                             return (
-                              <div key={task.id} className={`flex gap-1.5 items-start text-[11px] ${isTaskComplete ? 'text-slate-500' : 'text-slate-200'}`}>
+                              <div key={task.id} className={`flex gap-3 items-start text-[11px] ${isTaskComplete ? 'text-zinc-600' : 'text-zinc-300'}`}>
                                 {isTaskComplete ? (
                                   <CheckCircle2 size={13} className="text-emerald-500 shrink-0 mt-0.5" />
                                 ) : (
-                                  <Circle size={13} className="text-slate-600 shrink-0 mt-0.5" />
+                                  <div className="w-[13px] h-[13px] rounded-full border border-zinc-700 shrink-0 mt-0.5" />
                                 )}
-                                <span className={isTaskComplete ? 'line-through' : ''}>{idx + 1}. {task.description}</span>
+                                <span className={isTaskComplete ? 'line-through opacity-50' : 'font-medium'}>{idx + 1}. {task.description}</span>
                               </div>
                             );
                           })}
@@ -156,9 +152,9 @@ export const LessonsPanel: FC = () => {
                       {isActive && sc.hints.length > 0 && (
                         <button
                           onClick={() => setShowHints(!showHints)}
-                          className="flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 transition-colors"
+                          className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-white transition-all uppercase tracking-widest"
                         >
-                          <Lightbulb size={10} />
+                          <Lightbulb size={12} className="text-blue-500" />
                           {showHints ? 'Hide hints' : 'Need a hint?'}
                         </button>
                       )}
@@ -167,10 +163,10 @@ export const LessonsPanel: FC = () => {
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="bg-amber-950/20 p-2 rounded border border-amber-800/30 space-y-1"
+                          className="bg-[#111111] p-3 rounded-lg border border-white/5 space-y-2"
                         >
                           {sc.hints.map((hint, i) => (
-                            <p key={i} className="text-[10px] text-amber-300/70">💡 {hint}</p>
+                            <p key={i} className="text-[10px] text-zinc-500 leading-relaxed font-medium tracking-tight">/ {hint}</p>
                           ))}
                         </motion.div>
                       )}
@@ -178,13 +174,13 @@ export const LessonsPanel: FC = () => {
                       {/* Complete banner */}
                       {isActive && sc.tasks.every(t => t.check(state)) && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="p-2 bg-emerald-900/30 border border-emerald-800/50 rounded text-center"
+                          className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-center"
                         >
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Trophy size={14} className="text-emerald-400" />
-                            <span className="text-xs font-bold text-emerald-400">Complete!</span>
+                          <div className="flex items-center justify-center gap-2">
+                            <Trophy size={14} className="text-emerald-500" />
+                            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Scenario Mastery Achieved</span>
                           </div>
                         </motion.div>
                       )}

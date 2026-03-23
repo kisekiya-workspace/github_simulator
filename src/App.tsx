@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import useGitStore from './store/gitStore';
 import { FileExplorer, CodeEditor } from './components/Editor';
 import { ActionPanel } from './components/ActionPanel';
@@ -6,15 +7,16 @@ import { GitGraph } from './components/GitGraph';
 import { LessonsPanel } from './components/LessonsPanel';
 import { Home } from './components/Home';
 import { Terminal } from './components/Terminal';
+import { Documentation } from './components/Documentation';
 import { ToastContainer, useKeyboardShortcuts } from './components/Toast';
 import { OnboardingTour, useShouldShowTour } from './components/Onboarding';
-import { GitBranch, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, TerminalSquare } from 'lucide-react';
+import { BookOpen, GitBranch, Home as HomeIcon, PanelLeftClose, PanelLeftOpen, TerminalSquare } from 'lucide-react';
 
 function App() {
   const { commits, head, branches, detachedHead } = useGitStore();
   const [openFiles, setOpenFiles] = useState<string[]>([]);
   const [activeFile, setActiveFile] = useState<string | null>(null);
-  const [view, setView] = useState<'home' | 'playground'>('home');
+  const [view, setView] = useState<'home' | 'playground' | 'documentation'>('home');
   const [isLessonsOpen, setIsLessonsOpen] = useState(true);
   const [isTerminalOpen, setIsTerminalOpen] = useState(true);
   const [terminalHeight, setTerminalHeight] = useState(220);
@@ -48,7 +50,22 @@ function App() {
   if (view === 'home') {
     return (
       <>
-        <Home onOpenPlayground={() => { setView('playground'); if (shouldShowTour) setShowTour(true); }} />
+        <Home 
+          onOpenPlayground={() => { setView('playground'); if (shouldShowTour) setShowTour(true); }} 
+          onOpenDocs={() => setView('documentation')}
+        />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (view === 'documentation') {
+    return (
+      <>
+        <Documentation 
+          onBack={() => setView('home')} 
+          onPlay={() => { setView('playground'); if (shouldShowTour) setShowTour(true); }} 
+        />
         <ToastContainer />
       </>
     );
@@ -62,60 +79,81 @@ function App() {
   const headCommitId = branches[head] || head;
 
   return (
-    <div className="h-screen w-screen bg-slate-950 text-slate-300 overflow-hidden flex flex-col font-sans">
+    <div className="h-screen w-screen bg-[#050505] text-zinc-400 overflow-hidden flex flex-col font-sans selection:bg-white/10 selection:text-white">
       {/* Header */}
-      <header className="h-10 border-b border-slate-800/50 flex items-center px-4 shrink-0 bg-slate-950 justify-between">
-        <div className="flex items-center gap-3">
+      <header id="app-header" className="h-12 border-b border-white/5 flex items-center px-6 shrink-0 bg-[#050505] justify-between z-50">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => setView('home')}
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-800 rounded"
+            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-all p-1.5 hover:bg-white/5 rounded-lg"
             title="Back to Home"
           >
-            <HomeIcon size={16} />
+            <HomeIcon size={18} />
           </button>
-          <div className="w-px h-5 bg-slate-800" />
-          <div className="flex items-center gap-2 text-white font-bold text-sm tracking-wide">
+          <div className="w-px h-4 bg-white/5" />
+          <div className="flex items-center gap-2 text-white font-black text-sm tracking-tighter uppercase px-1">
             <GitBranch className="text-blue-500" size={16} />
             Git Sandbox
           </div>
           <button 
             onClick={() => setIsLessonsOpen(!isLessonsOpen)}
-            className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-white transition-all ml-2"
             title={isLessonsOpen ? 'Hide lessons' : 'Show lessons'}
           >
-            {isLessonsOpen ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+            {isLessonsOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
           </button>
         </div>
 
         {/* Status */}
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-1.5">
-            <GitBranch size={12} className="text-emerald-400" />
-            <span className="text-slate-400">{currentBranch}</span>
+        <div className="flex items-center gap-6 text-[11px] font-medium font-mono">
+          <div className="flex items-center gap-2 group cursor-default">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/[0.03] border border-emerald-500/10 rounded-lg group-hover:border-emerald-500/30 transition-all">
+              <svg width="24" height="12" viewBox="0 0 24 12" className="text-emerald-500/50">
+                <motion.path
+                  d="M 2 6 L 22 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray="4 8"
+                  animate={{ strokeDashoffset: [0, -12] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                />
+                <circle cx="4" cy="6" r="2" fill="currentColor" className="text-emerald-500" />
+              </svg>
+              <span className="text-zinc-300 uppercase tracking-widest font-bold">{currentBranch}</span>
+            </div>
           </div>
           {detachedHead && (
-            <span className="px-1.5 py-0.5 bg-amber-900/30 text-amber-400 rounded text-[10px] border border-amber-800/40">
+            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded font-bold border border-amber-500/20 text-[10px] tracking-widest">
               DETACHED
             </span>
           )}
-          <span className="text-slate-600 text-[10px] font-mono">{headCommitId.substring(0, 7)}</span>
-          <div className="w-px h-4 bg-slate-800" />
-          <button
-            onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-            className={`p-1 rounded transition-colors ${isTerminalOpen ? 'bg-slate-800 text-emerald-400' : 'text-slate-500 hover:text-white'}`}
-            title="Toggle Terminal (Ctrl+`)"
-          >
-            <TerminalSquare size={14} />
-          </button>
-          <span className="text-slate-700 text-[10px]">Ctrl+` terminal</span>
+          <span className="text-zinc-700 uppercase tracking-widest">{headCommitId.substring(0, 7)}</span>
+          <div className="w-px h-4 bg-white/5" />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setView('documentation')}
+              className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:bg-white/5 rounded-lg border border-white/5 transition-all flex items-center gap-2"
+            >
+              <BookOpen size={12} />
+              Docs
+            </button>
+            <button
+              onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+              className={`p-1.5 rounded-lg transition-all ${isTerminalOpen ? 'bg-white text-black' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+              title="Toggle Terminal (Ctrl+`)"
+            >
+              <TerminalSquare size={16} />
+            </button>
+            <span className="text-zinc-800 uppercase tracking-widest text-[9px]">Ctrl+` terminal</span>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex-1 flex min-h-0">
-        {/* Lessons Panel */}
         <div className={`transition-all duration-300 overflow-hidden flex shrink-0 ${isLessonsOpen ? 'w-64' : 'w-0'}`}>
-          <div className="w-64 shrink-0 h-full border-r border-slate-700/50">
+          <div id="app-lessons" className="w-64 shrink-0 h-full border-r border-white/5 bg-[#050505]">
             <LessonsPanel />
           </div>
         </div>
@@ -125,7 +163,7 @@ function App() {
           {/* Top: Editor + Graph */}
           <div className="flex-1 flex min-h-0 overflow-hidden">
             {/* File Explorer */}
-            <div className="w-44 shrink-0 overflow-hidden">
+            <div id="app-explorer" className="w-48 shrink-0 overflow-hidden">
               <FileExplorer
                 openFiles={openFiles}
                 activeFile={activeFile}
@@ -136,7 +174,7 @@ function App() {
             </div>
 
             {/* Code Editor */}
-            <div className="flex-1 min-w-[280px] border-r border-slate-800/50 overflow-hidden">
+            <div id="app-editor" className="flex-1 min-w-[280px] border-r border-white/5 overflow-hidden">
               <CodeEditor
                 activeFile={activeFile}
                 openFiles={openFiles}
@@ -146,7 +184,7 @@ function App() {
             </div>
 
             {/* Git Graph */}
-            <div className="w-[40%] min-w-[300px] overflow-hidden">
+            <div id="app-graph" className="w-[40%] min-w-[300px] overflow-hidden">
               <GitGraph />
             </div>
           </div>
@@ -154,12 +192,13 @@ function App() {
           {/* Terminal Panel */}
           {isTerminalOpen && (
             <div 
-              className="border-t border-slate-700/50 shrink-0"
+              id="app-terminal"
+              className="border-t border-white/5 shrink-0 bg-[#050505]"
               style={{ height: terminalHeight }}
             >
               {/* Terminal resize handle */}
               <div
-                className="h-1 bg-slate-800 cursor-row-resize hover:bg-blue-600/30 transition-colors group flex items-center justify-center"
+                className="h-1 bg-[#0a0a0a] cursor-row-resize hover:bg-blue-500/20 transition-all group flex items-center justify-center border-b border-white/5"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   const startY = e.clientY;
@@ -176,7 +215,7 @@ function App() {
                   document.addEventListener('mouseup', onUp);
                 }}
               >
-                <div className="w-8 h-0.5 bg-slate-600 rounded group-hover:bg-blue-400 transition-colors" />
+                <div className="w-12 h-1 bg-white/5 rounded-full group-hover:bg-blue-500/40 transition-all" />
               </div>
               <div className="h-[calc(100%-4px)]">
                 <Terminal />
@@ -185,7 +224,9 @@ function App() {
           )}
 
           {/* Action Panel */}
-          <ActionPanel />
+          <div id="app-actions">
+            <ActionPanel />
+          </div>
         </div>
       </div>
 

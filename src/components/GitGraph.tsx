@@ -18,13 +18,13 @@ const PADDING_TOP = 30;
 const NODE_RADIUS = 7;
 
 const LANE_COLORS = [
-  { stroke: '#3B82F6', fill: '#1D4ED8' },  // blue
-  { stroke: '#10B981', fill: '#047857' },  // emerald
-  { stroke: '#A855F7', fill: '#7C3AED' },  // purple
-  { stroke: '#F59E0B', fill: '#D97706' },  // amber
-  { stroke: '#EF4444', fill: '#DC2626' },  // red
-  { stroke: '#06B6D4', fill: '#0891B2' },  // cyan
-  { stroke: '#EC4899', fill: '#DB2777' },  // pink
+  { stroke: '#3b82f6', fill: '#1d4ed8' },  // blue
+  { stroke: '#10b981', fill: '#047857' },  // emerald
+  { stroke: '#a1a1aa', fill: '#52525b' },  // zinc
+  { stroke: '#f59e0b', fill: '#d97706' },  // amber
+  { stroke: '#f43f5e', fill: '#e11d48' },  // rose
+  { stroke: '#06b6d4', fill: '#0891b2' },  // cyan
+  { stroke: '#8b5cf6', fill: '#7c3aed' },  // violet
 ];
 
 export const GitGraph: FC = () => {
@@ -107,24 +107,29 @@ export const GitGraph: FC = () => {
 
   if (Object.keys(commits).length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-600 flex-col gap-2">
-        <History size={48} className="text-slate-700" />
-        <p className="text-sm">No commits yet</p>
+      <div className="flex-1 flex items-center justify-center bg-[#050505] text-zinc-600 flex-col gap-6">
+        <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center">
+          <History size={32} className="text-zinc-800" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-bold text-zinc-400 tracking-tight">No commits yet</p>
+          <p className="text-[10px] text-zinc-700 font-mono uppercase tracking-widest mt-2 px-2 py-0.5 border border-white/5 rounded">Start by making a commit</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-slate-900 font-mono text-sm relative h-full">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#050505] font-mono text-sm relative h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800 z-10 shrink-0">
-        <h2 className="text-white font-semibold text-sm flex items-center gap-2">
-          <History size={14} className="text-slate-400" />
-          Commit Graph
+      <div className="flex items-center justify-between px-6 py-3 bg-[#0a0a0a] border-b border-white/5 z-10 shrink-0">
+        <h2 className="text-white font-bold text-[11px] flex items-center gap-3 uppercase tracking-[0.2em]">
+          <History size={16} className="text-zinc-500" />
+          Commit History
         </h2>
         <button
           onClick={() => setShowAllBranches(!showAllBranches)}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-slate-800"
+          className="flex items-center gap-2 text-[10px] text-zinc-500 font-bold uppercase tracking-widest hover:text-white transition-all px-3 py-1.5 rounded-lg border border-white/5 hover:bg-white/5"
         >
           {showAllBranches ? <Eye size={12} /> : <EyeOff size={12} />}
           {showAllBranches ? 'All branches' : 'Current only'}
@@ -233,28 +238,29 @@ export const GitGraph: FC = () => {
                   />
                 )}
 
-                {/* Labels - Left side: commit info */}
+                {/* Labels - Right side: commit info */}
                 <g className="pointer-events-none">
                   {/* Commit hash */}
-                  <text x={pos.x + 20} y={pos.y - 6} fill="#94A3B8" fontSize={10} fontFamily="monospace">
-                    {commit.id}
+                  <text x={pos.x + 20} y={pos.y - 6} fill="#52525b" fontSize={10} fontFamily="monospace" fontWeight="bold">
+                    {commit.id.substring(0, 7)}
+                    {isHead ? ' (HEAD)' : ''}
                   </text>
                   
                   {/* Commit message */}
-                  <text x={pos.x + 20} y={pos.y + 10} fill="#E2E8F0" fontSize={11} fontFamily="sans-serif">
+                  <text x={pos.x + 20} y={pos.y + 10} fill="#d4d4d8" fontSize={12} fontFamily="Inter, sans-serif" fontWeight="500">
                     {commit.message.length > 50 ? commit.message.substring(0, 50) + '...' : commit.message}
                   </text>
                 </g>
 
-                {/* Branch badges - Left of node */}
+                {/* Branch badges - Top of node */}
                 {commitBranches.map((b, i) => (
-                  <g key={b} transform={`translate(${pos.x - 20 - i * 0}, ${pos.y - 20})`}>
-                    <rect x={-b.length * 3.5 - 16} y={-8} width={b.length * 7 + 28} height={16} rx={3} 
-                      fill={isHead && b === head ? '#1E40AF' : '#1E293B'} 
-                      stroke={isHead && b === head ? '#3B82F6' : '#475569'} 
+                  <g key={b} transform={`translate(${pos.x - 24 - i * 4}, ${pos.y - 24})`}>
+                    <rect x={-b.length * 3.5 - 20} y={-10} width={b.length * 7 + 32} height={20} rx={6} 
+                      fill={isHead && b === head ? '#ffffff' : '#111111'} 
+                      stroke={isHead && b === head ? '#ffffff' : 'rgba(255,255,255,0.05)'} 
                       strokeWidth={1} 
                     />
-                    <text x={-b.length * 3.5} y={4} fill={isHead && b === head ? '#93C5FD' : '#94A3B8'} fontSize={10} fontFamily="sans-serif">
+                    <text x={-b.length * 3.5} y={4} fill={isHead && b === head ? '#000000' : '#a1a1aa'} fontSize={10} fontFamily="Inter, sans-serif" fontWeight="bold">
                       {b === head ? '⎆ ' : ''}{b}
                     </text>
                   </g>
@@ -274,15 +280,15 @@ export const GitGraph: FC = () => {
 
                 {/* Tooltip on hover */}
                 {isHovered && (
-                  <g transform={`translate(${pos.x + 20}, ${pos.y + 22})`}>
-                    <rect x={0} y={0} width={220} height={60} rx={6} fill="#0F172A" stroke="#334155" strokeWidth={1} opacity={0.95} />
-                    <text x={10} y={18} fill="#94A3B8" fontSize={9}>
+                  <g transform={`translate(${pos.x + 20}, ${pos.y + 24})`}>
+                    <rect x={0} y={0} width={260} height={70} rx={12} fill="#111111" stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
+                    <text x={14} y={20} fill="#71717a" fontSize={10} fontWeight="bold">
                       {new Date(commit.timestamp).toLocaleString()}
                     </text>
-                    <text x={10} y={32} fill="#60A5FA" fontSize={9}>
-                      Parents: {commit.parents.join(', ') || 'none (root)'}
+                    <text x={14} y={36} fill="#3b82f6" fontSize={10} fontWeight="bold">
+                      Parents: {commit.parents.map(p => p.substring(0, 7)).join(', ') || 'root'}
                     </text>
-                    <text x={10} y={46} fill="#94A3B8" fontSize={9}>
+                    <text x={14} y={52} fill="#d4d4d8" fontSize={10} fontWeight="medium">
                       Files: {Object.keys(commit.files).join(', ')}
                     </text>
                   </g>

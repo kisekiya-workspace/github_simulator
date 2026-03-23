@@ -1,0 +1,9 @@
+src/components/ActionPanel.tsx(8,36): error TS6133: 'tags' is declared but its value is never read.
+src/components/ActionPanel.tsx(12,20): error TS6133: 'completeMerge' is declared but its value is never read.
+src/components/Editor.tsx(195,9): error TS6133: 'fileStatus' is declared but its value is never read.
+src/components/GitGraph.tsx(6,10): error TS6133: 'Tag' is declared but its value is never read.
+src/components/GitGraph.tsx(6,24): error TS6133: 'GitBranch' is declared but its value is never read.
+src/components/Home.tsx(3,47): error TS6133: 'Sparkles' is declared but its value is never read.
+src/components/Home.tsx(3,86): error TS6133: 'GitCommit' is declared but its value is never read.
+src/components/Home.tsx(28,9): error TS6133: 'progressPercent' is declared but its value is never read.
+src/store/commandParser.ts(527,9): error TS6133: 'isSoft' is declared but its value is never read.

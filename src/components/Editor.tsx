@@ -192,7 +192,6 @@ export const CodeEditor: FC<{
     );
   }
 
-  const fileStatus = getFileStatus(activeFile, workingDirectory, headFiles, stagedFiles, conflictState?.files);
   const isConflict = conflictState?.files[activeFile];
 
   return (

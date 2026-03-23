@@ -3,7 +3,7 @@ import type { FC } from 'react';
 import { motion } from 'framer-motion';
 import useGitStore from '../store/gitStore';
 import { getAncestors } from '../store/utils';
-import { Tag, History, GitBranch, Eye, EyeOff } from 'lucide-react';
+import { History, Eye, EyeOff } from 'lucide-react';
 
 interface NodePosition {
   x: number;

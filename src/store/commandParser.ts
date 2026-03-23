@@ -524,7 +524,6 @@ function handleTag(args: string[], store: GitState): OutputLine[] {
 
 function handleReset(args: string[], store: GitState): OutputLine[] {
   const isHard = hasFlag(args, '--hard');
-  const isSoft = hasFlag(args, '--soft');
   const type = isHard ? 'hard' : 'soft';
   
   const targetId = args.find(a => !a.startsWith('-'));

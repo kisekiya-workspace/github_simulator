@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { motion } from 'framer-motion';
-import { GitBranch, BookOpen, Play, Terminal, Sparkles, Award, ArrowRight, GitMerge, GitCommit, Tag } from 'lucide-react';
+import { GitBranch, BookOpen, Play, Terminal, Award, ArrowRight, GitMerge, Tag } from 'lucide-react';
 import { scenarios, difficultyColors } from '../store/scenarios';
 import useGitStore from '../store/gitStore';
 import type { ScenarioDifficulty } from '../types';
@@ -25,7 +25,6 @@ export const Home: FC<{ onOpenPlayground: () => void }> = ({ onOpenPlayground })
   const { loadScenario, initRepo, completedScenarios } = useGitStore();
 
   const totalCompleted = completedScenarios.length;
-  const progressPercent = Math.round((totalCompleted / scenarios.length) * 100);
 
   const groupedScenarios: Record<ScenarioDifficulty, typeof scenarios> = {
     beginner: scenarios.filter(s => s.difficulty === 'beginner'),

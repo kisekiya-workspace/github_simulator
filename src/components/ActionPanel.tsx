@@ -5,11 +5,11 @@ import { GitBranch, GitMerge, GitCommit, GitPullRequest, RotateCcw, Tag, Archive
 
 export const ActionPanel: FC = () => {
   const { 
-    head, branches, conflictState, tags, stash,
+    head, branches, conflictState, stash,
     commit, createBranch, checkout, merge, rebase,
     resolveConflict, abortMerge, resetAll,
     stashChanges, stashPop, createTag,
-    stageAllFiles, completeMerge
+    stageAllFiles
   } = useGitStore();
 
   const [message, setMessage] = useState('');
